@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kakedomen | שרת ההישרדות המתקדם בישראל</title>
+<meta name="description" content="Kakedomen - שרת הישרדות Minecraft מתקדם עם דרגות, קיטים, קוסמטיקה ואירועים. הצטרפו עכשיו!">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;800;900&family=Orbitron:wght@500;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ===================== TOKENS ===================== */
+:root{
+  --primary:#00FFFF;
+  --primary-dim:#00b3b3;
+  --secondary:#00FF66;
+  --secondary-dim:#00b347;
+  --bg:#090909;
+  --bg-soft:#0d1212;
+  --panel:rgba(255,255,255,.035);
+  --panel-strong:rgba(255,255,255,.06);
+  --border:rgba(0,255,255,.16);
+  --border-soft:rgba(255,255,255,.08);
+  --text:#eafcfb;
+  --muted:#8fa8a6;
+  --muted-2:#5d7472;
+  --danger:#ff3860;
+  --radius:16px;
+  --ff-display:'Orbitron',sans-serif;
+  --ff-body:'Rubik',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--ff-body);
+  overflow-x:hidden;
+  min-height:100vh;
+}
+::selection{background:var(--primary);color:#000;}
+::-webkit-scrollbar{width:10px;}
+::-webkit-scrollbar-track{background:#000;}
+::-webkit-scrollbar-thumb{background:linear-gradient(var(--primary),var(--secondary));border-radius:10px;}
+a{color:inherit;text-decoration:none;}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+img{max-width:100%;display:block;}
+.container{max-width:1280px;margin:0 auto;padding:0 28px;}
+.eyebrow{
+  font-family:var(--ff-display);
+  font-size:12px;
+  letter-spacing:.18em;
+  color:var(--secondary);
+  text-shadow:0 0 12px rgba(0,255,102,.6);
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:14px;
+}
+.eyebrow::before{content:'';width:8px;height:8px;border-radius:2px;background:var(--secondary);box-shadow:0 0 10px var(--secondary);transform:rotate(45deg);}
+h1,h2,h3{font-weight:800;line-height:1.15;}
+.section-title{font-size:clamp(28px,4vw,44px);margin-bottom:14px;}
+.section-title span{color:var(--primary);text-shadow:0 0 24px rgba(0,255,255,.45);}
+.section-sub{color:var(--muted);font-size:16px;max-width:620px;margin-bottom:46px;line-height:1.7;}
+.glow-text{color:var(--primary);text-shadow:0 0 18px rgba(0,255,255,.6);}
+.section{padding:120px 0 60px;display:none;animation:fadeUp .55s ease both;}
+.section.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+
+/* reveal on scroll */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease;}
+.reveal.show{opacity:1;transform:translateY(0);}
+
+/* ===================== BUTTONS ===================== */
+.btn{
+  font-family:var(--ff-body);
+  font-weight:700;
+  font-size:15px;
+  padding:15px 30px;
+  border-radius:12px;
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  position:relative;
+  transition:transform .25s ease, box-shadow .25s ease;
+  white-space:nowrap;
+}
+.btn:active{transform:scale(.96);}
+.btn-primary{
+  background:linear-gradient(135deg,var(--primary),var(--secondary));
+  color:#021110;
+  box-shadow:0 0 24px rgba(0,255,255,.35), 0 0 50px rgba(0,255,102,.15);
+}
+.btn-primary:hover{box-shadow:0 0 36px rgba(0,255,255,.6), 0 0 70px rgba(0,255,102,.3);transform:translateY(-2px);}
+.btn-ghost{
+  background:var(--panel);
+  border:1px solid var(--border);
+  color:var(--text);
+  backdrop-filter:blur(10px);
+}
+.btn-ghost:hover{border-color:var(--primary);box-shadow:0 0 22px rgba(0,255,255,.25);transform:translateY(-2px);}
+.btn-discord{background:rgba(88,101,242,.12);border:1px solid rgba(88,101,242,.5);color:#a8b0ff;}
+.btn-discord:hover{box-shadow:0 0 22px rgba(88,101,242,.4);transform:translateY(-2px);}
+.btn-sm{padding:10px 18px;font-size:13px;border-radius:9px;}
+.btn-block{width:100%;justify-content:center;}
+
+/* ===================== LOADER ===================== */
+#loader{
+  position:fixed;inset:0;background:var(--bg);z-index:9999;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:22px;
+  transition:opacity .6s ease, visibility .6s ease;
+}
+#loader.hide{opacity:0;visibility:hidden;}
+.loader-logo{
+  font-family:var(--ff-display);font-weight:900;font-size:34px;letter-spacing:.08em;
+  color:var(--text);
+}
+.loader-logo span{color:var(--primary);text-shadow:0 0 30px var(--primary);}
+.loader-bar{width:240px;height:4px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;}
+.loader-bar i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--secondary),var(--primary));box-shadow:0 0 12px var(--primary);animation:loadbar 1.4s ease forwards;}
+@keyframes loadbar{to{width:100%;}}
+.loader-tip{font-size:12px;color:var(--muted-2);letter-spacing:.05em;}
+
+/* ===================== NAVBAR ===================== */
+header.nav{
+  position:fixed;top:0;right:0;left:0;z-index:500;
+  padding:14px 0;
+  transition:background .3s ease, box-shadow .3s ease, padding .3s ease;
+}
+header.nav.scrolled{
+  background:rgba(9,9,9,.72);
+  backdrop-filter:blur(16px) saturate(160%);
+  box-shadow:0 4px 30px rgba(0,0,0,.5);
+  border-bottom:1px solid var(--border-soft);
+  padding:10px 0;
+}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;gap:20px;}
+.logo{display:flex;align-items:center;gap:10px;font-family:var(--ff-display);font-weight:800;font-size:20px;}
+.logo .cube{width:30px;height:30px;position:relative;filter:drop-shadow(0 0 10px var(--primary));}
+.logo .cube svg{width:100%;height:100%;}
+.logo b{color:var(--primary);}
+.nav-links{display:flex;gap:6px;align-items:center;}
+.nav-links a{
+  font-size:14px;font-weight:600;padding:9px 14px;border-radius:9px;color:var(--muted);
+  transition:color .2s, background .2s;position:relative;
+}
+.nav-links a:hover{color:var(--text);background:var(--panel);}
+.nav-links a.active{color:var(--primary);background:rgba(0,255,255,.08);}
+.nav-cta{display:flex;align-items:center;gap:10px;}
+.status-pill{
+  display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;
+  background:var(--panel);border:1px solid var(--border-soft);border-radius:20px;padding:7px 12px;
+}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--secondary);box-shadow:0 0 8px var(--secondary);animation:pulse 1.6s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.burger{display:none;width:38px;height:38px;border-radius:9px;background:var(--panel);border:1px solid var(--border-soft);align-items:center;justify-content:center;}
+.burger span{display:block;width:16px;height:2px;background:var(--text);position:relative;}
+.burger span::before,.burger span::after{content:'';position:absolute;width:16px;height:2px;background:var(--text);right:0;}
+.burger span::before{top:-5px;}
+.burger span::after{top:5px;}
+
+/* ===================== HERO ===================== */
+.hero{
+  position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;
+  text-align:center;overflow:hidden;padding:140px 20px 60px;
+}
+.hero-bg{position:absolute;inset:0;z-index:0;background:
+  radial-gradient(ellipse 60% 50% at 50% 0%, rgba(0,255,255,.10), transparent 60%),
+  radial-gradient(ellipse 50% 40% at 80% 100%, rgba(0,255,102,.08), transparent 60%),
+  var(--bg);
+}
+.grid-floor{
+  position:absolute;left:0;right:0;bottom:0;height:55%;z-index:0;
+  background-image:linear-gradient(rgba(0,255,255,.12) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,255,.12) 1px, transparent 1px);
+  background-size:46px 46px;
+  -webkit-mask-image:linear-gradient(to top, rgba(0,0,0,.9), transparent);
+  mask-image:linear-gradient(to top, rgba(0,0,0,.9), transparent);
+  transform:perspective(420px) rotateX(58deg) scale(1.6);
+  transform-origin:bottom;
+  animation:floorMove 6s linear infinite;
+}
+@keyframes floorMove{from{background-position:0 0;}to{background-position:0 46px;}}
+.cubes{position:absolute;inset:0;z-index:0;pointer-events:none;}
+.cube-f{
+  position:absolute;width:38px;height:38px;border-radius:6px;
+  background:linear-gradient(135deg, rgba(0,255,255,.16), rgba(0,255,102,.10));
+  border:1px solid rgba(0,255,255,.35);
+  box-shadow:0 0 20px rgba(0,255,255,.18) inset, 0 0 16px rgba(0,255,255,.12);
+  animation:floaty 7s ease-in-out infinite;
+}
+@keyframes floaty{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-26px) rotate(8deg);}}
+.hero-content{position:relative;z-index:2;max-width:780px;}
+.hero-logo{width:104px;height:104px;margin:0 auto 26px;filter:drop-shadow(0 0 30px rgba(0,255,255,.55));animation:floaty 5s ease-in-out infinite;}
+.hero h1{font-family:var(--ff-display);font-size:clamp(34px,6vw,64px);font-weight:900;letter-spacing:.01em;margin-bottom:18px;}
+.hero h1 .hl{color:var(--primary);text-shadow:0 0 30px rgba(0,255,255,.65),0 0 60px rgba(0,255,255,.25);}
+.hero p.sub{font-size:clamp(15px,2vw,19px);color:var(--muted);margin-bottom:36px;line-height:1.8;}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-bottom:54px;}
+
+.server-bar{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:1px;
+  background:var(--border-soft);border:1px solid var(--border-soft);border-radius:var(--radius);
+  overflow:hidden;backdrop-filter:blur(14px);max-width:920px;margin:0 auto;
+}
+.server-bar .cell{background:rgba(9,9,9,.55);padding:18px 10px;text-align:center;position:relative;}
+.server-bar .cell .lbl{font-size:11px;color:var(--muted-2);letter-spacing:.08em;margin-bottom:6px;}
+.server-bar .cell .val{font-family:var(--ff-display);font-weight:800;font-size:18px;color:var(--text);}
+.server-bar .cell .val.ip{font-size:14px;color:var(--primary);cursor:pointer;}
+.server-bar .cell .val.online{color:var(--secondary);text-shadow:0 0 10px var(--secondary);}
+
+/* scroll cue */
+.scroll-cue{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:2;color:var(--muted-2);font-size:11px;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.scroll-cue i{width:1px;height:34px;background:linear-gradient(var(--primary),transparent);animation:scrolld 1.8s infinite;}
+@keyframes scrolld{0%{opacity:0;transform:translateY(-6px);}50%{opacity:1;}100%{opacity:0;transform:translateY(10px);}}
+
+/* ===================== CARDS GRID (features) ===================== */
+.grid{display:grid;gap:22px;}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+.grid-4{grid-template-columns:repeat(4,1fr);}
+@media(max-width:980px){.grid-3,.grid-4{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:620px){.grid-3,.grid-4{grid-template-columns:1fr;}}
+
+.feature-card{
+  background:var(--panel);border:1px solid var(--border-soft);border-radius:var(--radius);
+  padding:30px 24px;position:relative;overflow:hidden;transition:transform .35s ease, border-color .35s ease, box-shadow .35s ease;
+}
+.feature-card::before{
+  content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 0%, rgba(0,255,255,.12), transparent 60%);
+  opacity:0;transition:opacity .35s ease;
+}
+.feature-card:hover{transform:translateY(-8px);border-color:var(--primary);box-shadow:0 18px 50px rgba(0,255,255,.12), 0 0 0 1px rgba(0,255,255,.15);}
+.feature-card:hover::before{opacity:1;}
+.feature-card .ic{font-size:30px;margin-bottom:16px;display:inline-block;filter:drop-shadow(0 0 12px rgba(0,255,255,.5));}
+.feature-card h3{font-size:18px;margin-bottom:8px;}
+.feature-card p{color:var(--muted);font-size:14px;line-height:1.7;}
+
+/* ===================== RANKS ===================== */
+.rank-card{
+  background:var(--panel);border:1px solid var(--border-soft);border-radius:var(--radius);
+  padding:0;overflow:hidden;transition:transform .35s ease, box-shadow .35s ease;position:relative;
+}
+.rank-card:hover{transform:translateY(-10px) scale(1.02);box-shadow:0 22px 60px rgba(0,0,0,.5);}
+.rank-head{padding:26px 24px 20px;position:relative;}
+.rank-head::after{content:'';position:absolute;bottom:0;right:0;left:0;height:1px;background:linear-gradient(90deg,transparent,var(--rc),transparent);}
+.rank-tag{font-family:var(--ff-display);font-size:11px;letter-spacing:.12em;color:var(--rc);margin-bottom:8px;}
+.rank-name{font-family:var(--ff-display);font-size:26px;font-weight:800;color:var(--rc);text-shadow:0 0 18px var(--rc);}
+.rank-price{font-size:13px;color:var(--muted);margin-top:6px;}
+.rank-body{padding:20px 24px 26px;}
+.rank-body ul{list-style:none;display:flex;flex-direction:column;gap:11px;margin-bottom:22px;}
+.rank-body li{font-size:13.5px;color:var(--muted);display:flex;align-items:flex-start;gap:8px;line-height:1.5;}
+.rank-body li::before{content:'✓';color:var(--rc);font-weight:800;flex-shrink:0;}
+.rank-glow{position:absolute;top:-40px;left:-40px;width:140px;height:140px;border-radius:50%;background:var(--rc);opacity:.12;filter:blur(40px);}
+
+/* ===================== SHOP ===================== */
+.shop-tabs{display:flex;gap:10px;margin-bottom:36px;flex-wrap:wrap;}
+.shop-tab{padding:11px 20px;border-radius:10px;background:var(--panel);border:1px solid var(--border-soft);font-weight:700;font-size:14px;color:var(--muted);transition:.2s;}
+.shop-tab.active{color:#021110;background:linear-gradient(135deg,var(--primary),var(--secondary));border-color:transparent;box-shadow:0 0 20px rgba(0,255,255,.3);}
+.product-card{
+  background:var(--panel);border:1px solid var(--border-soft);border-radius:var(--radius);overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;position:relative;
+}
+.product-card:hover{transform:translateY(-6px);box-shadow:0 16px 40px rgba(0,255,255,.1);border-color:var(--border);}
+.product-img{
+  height:140px;display:flex;align-items:center;justify-content:center;font-size:46px;
+  background:linear-gradient(135deg, rgba(0,255,255,.08), rgba(0,255,102,.06));position:relative;
+}
+.badge-pop{
+  position:absolute;top:12px;right:12px;background:var(--secondary);color:#021110;font-size:10.5px;font-weight:800;
+  padding:5px 10px;border-radius:20px;box-shadow:0 0 14px rgba(0,255,102,.5);
+}
+.product-body{padding:18px 18px 20px;}
+.product-body h4{font-size:15px;margin-bottom:6px;}
+.product-body .price{font-family:var(--ff-display);color:var(--primary);font-weight:800;font-size:18px;margin:10px 0 14px;}
+.secure-line{display:flex;align-items:center;gap:8px;justify-content:center;color:var(--muted-2);font-size:12.5px;margin-top:36px;}
+
+/* ===================== PLAYER AREA ===================== */
+.player-grid{display:grid;grid-template-columns:340px 1fr;gap:26px;align-items:start;}
+@media(max-width:860px){.player-grid{grid-template-columns:1fr;}}
+.panel{background:var(--panel);border:1px solid var(--border-soft);border-radius:var(--radius);padding:26px;}
+.login-form input{
+  width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border-soft);border-radius:10px;
+  padding:13px 16px;color:var(--text);font-size:14px;margin-bottom:14px;transition:border-color .2s;
+}
+.login-form input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,255,255,.1);}
+.login-form label{font-size:12px;color:var(--muted);margin-bottom:6px;display:block;}
+.skin-box{
+  width:100%;height:230px;border-radius:12px;background:linear-gradient(160deg, rgba(0,255,255,.08), rgba(0,255,102,.05));
+  border:1px solid var(--border-soft);display:flex;align-items:center;justify-content:center;margin-bottom:18px;font-size:64px;
+}
+.player-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:10px;}
+.stat-box{background:rgba(255,255,255,.03);border:1px solid var(--border-soft);border-radius:12px;padding:16px;text-align:center;}
+.stat-box .num{font-family:var(--ff-display);font-size:24px;font-weight:800;color:var(--primary);}
+.stat-box .lab{font-size:12px;color:var(--muted);margin-top:4px;}
+.achv{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px;}
+.achv span{background:rgba(255,255,255,.04);border:1px solid var(--border-soft);border-radius:9px;padding:9px 13px;font-size:12.5px;display:flex;gap:6px;align-items:center;}
+.rank-chip{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:20px;font-weight:800;font-size:13px;background:rgba(255,255,255,.05);}
+
+/* ===================== LEADERBOARDS ===================== */
+.lb-tabs{display:flex;gap:10px;margin-bottom:26px;}
+table.lb{width:100%;border-collapse:collapse;}
+table.lb th{text-align:right;font-size:12px;color:var(--muted-2);letter-spacing:.05em;padding:12px 16px;border-bottom:1px solid var(--border-soft);}
+table.lb td{padding:14px 16px;font-size:14.5px;border-bottom:1px solid rgba(255,255,255,.04);}
+table.lb tr{transition:background .2s;}
+table.lb tbody tr:hover{background:rgba(0,255,255,.04);}
+.rank-no{font-family:var(--ff-display);font-weight:800;color:var(--muted);}
+tr:nth-child(1) .rank-no{color:#ffd700;text-shadow:0 0 10px #ffd700;}
+tr:nth-child(2) .rank-no{color:#c8d4e0;text-shadow:0 0 10px #c8d4e0;}
+tr:nth-child(3) .rank-no{color:#e2a25c;text-shadow:0 0 10px #e2a25c;}
+.player-name{display:flex;align-items:center;gap:10px;font-weight:700;}
+.player-name .av{width:26px;height:26px;border-radius:6px;background:linear-gradient(135deg,var(--primary),var(--secondary));display:inline-block;}
+.lb-val{color:var(--secondary);font-weight:800;font-family:var(--ff-display);}
+
+/* ===================== GALLERY ===================== */
+.gallery-slider{position:relative;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border-soft);}
+.slides{display:flex;transition:transform .5s ease;}
+.slide{min-width:100%;height:440px;display:flex;align-items:center;justify-content:center;font-size:80px;position:relative;cursor:zoom-in;}
+.slide .cap{position:absolute;bottom:0;right:0;left:0;padding:20px 26px;background:linear-gradient(to top, rgba(0,0,0,.75), transparent);font-size:14px;color:var(--text);font-weight:700;}
+.slider-btn{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:rgba(9,9,9,.6);border:1px solid var(--border-soft);display:flex;align-items:center;justify-content:center;font-size:18px;backdrop-filter:blur(8px);transition:.2s;z-index:3;}
+.slider-btn:hover{background:var(--primary);color:#021110;box-shadow:0 0 20px var(--primary);}
+.slider-btn.prev{right:16px;}
+.slider-btn.next{left:16px;}
+.dots{display:flex;gap:8px;justify-content:center;margin-top:18px;}
+.dots span{width:9px;height:9px;border-radius:50%;background:var(--border-soft);cursor:pointer;transition:.2s;}
+.dots span.active{background:var(--primary);box-shadow:0 0 10px var(--primary);width:24px;border-radius:5px;}
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:2000;display:none;align-items:center;justify-content:center;font-size:140px;}
+.lightbox.show{display:flex;}
+.lightbox .close{position:absolute;top:24px;left:24px;font-size:30px;color:var(--text);}
+
+/* ===================== COMMUNITY ===================== */
+.news-card{background:var(--panel);border:1px solid var(--border-soft);border-radius:var(--radius);padding:24px;transition:.3s;}
+.news-card:hover{transform:translateY(-6px);border-color:var(--border);}
+.news-tag{font-size:11px;font-weight:800;color:var(--secondary);letter-spacing:.06em;margin-bottom:10px;display:block;}
+.news-card h4{font-size:16px;margin-bottom:8px;}
+.news-card p{font-size:13.5px;color:var(--muted);line-height:1.6;}
+.news-date{font-size:11.5px;color:var(--muted-2);margin-top:14px;display:block;}
+.discord-cta{
+  margin-top:60px;padding:46px;border-radius:20px;text-align:center;position:relative;overflow:hidden;
+  background:linear-gradient(135deg, rgba(88,101,242,.12), rgba(0,255,255,.05));border:1px solid rgba(88,101,242,.35);
+}
+.discord-cta h3{font-size:26px;margin-bottom:10px;}
+.discord-cta p{color:var(--muted);margin-bottom:24px;}
+
+/* ===================== FOOTER ===================== */
+footer{border-top:1px solid var(--border-soft);padding:60px 0 28px;margin-top:80px;background:linear-gradient(to top, rgba(0,255,255,.03), transparent);}
+.footer-grid{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px;}
+@media(max-width:860px){.footer-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:560px){.footer-grid{grid-template-columns:1fr;}}
+.footer-grid h5{font-size:14px;margin-bottom:16px;color:var(--text);}
+.footer-grid ul{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.footer-grid a{font-size:13.5px;color:var(--muted);transition:.2s;}
+.footer-grid a:hover{color:var(--primary);}
+.footer-ip{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--border-soft);border-radius:10px;padding:10px 14px;margin-top:14px;font-family:var(--ff-display);font-size:13px;}
+.footer-ip button{color:var(--primary);font-weight:700;font-size:12px;}
+.footer-bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;border-top:1px solid var(--border-soft);padding-top:24px;font-size:12.5px;color:var(--muted-2);}
+.toast{
+  position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--panel-strong);
+  border:1px solid var(--primary);color:var(--text);padding:13px 22px;border-radius:10px;font-size:13.5px;font-weight:700;
+  box-shadow:0 0 30px rgba(0,255,255,.25);opacity:0;transition:.3s;z-index:3000;pointer-events:none;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+@media(max-width:900px){
+  .nav-links{display:none;}
+  .burger{display:flex;}
+  .server-bar{grid-template-columns:repeat(2,1fr);}
+  .footer-grid{text-align:right;}
+}
+.mobile-menu{
+  position:fixed;top:0;left:0;right:0;background:rgba(9,9,9,.97);backdrop-filter:blur(14px);z-index:600;
+  padding:90px 28px 30px;display:flex;flex-direction:column;gap:14px;transform:translateY(-100%);transition:transform .35s ease;height:100vh;
+}
+.mobile-menu.open{transform:translateY(0);}
+.mobile-menu a{font-size:18px;font-weight:700;padding:12px 0;border-bottom:1px solid var(--border-soft);}
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div class="loader-logo">Kake<span>domen</span></div>
+  <div class="loader-bar"><i></i></div>
+  <div class="loader-tip">טוען עולם...</div>
+</div>
+
+<div class="lightbox" id="lightbox"><span class="close" onclick="closeLightbox()">✕</span><span id="lightboxImg"></span></div>
+<div class="toast" id="toast"></div>
+
+<!-- NAVBAR -->
+<header class="nav" id="navbar">
+  <div class="container nav-inner">
+    <div class="logo">
+      <span class="cube">
+        <svg viewBox="0 0 100 100"><polygon points="50,5 90,27 90,73 50,95 10,73 10,27" fill="none" stroke="#00FFFF" stroke-width="4"/><polygon points="50,5 90,27 50,49 10,27" fill="#00FFFF" opacity=".25"/><polygon points="50,49 90,27 90,73 50,95" fill="#00FF66" opacity=".18"/></svg>
+      </span>
+      Kake<b>domen</b>
+    </div>
+    <nav class="nav-links" id="navLinks">
+      <a href="#home" class="nlink active" data-target="home">בית</a>
+      <a href="#features" class="nlink" data-target="features">פיצ'רים</a>
+      <a href="#ranks" class="nlink" data-target="ranks">דרגות</a>
+      <a href="#shop" class="nlink" data-target="shop">חנות</a>
+      <a href="#player" class="nlink" data-target="player">אזור שחקן</a>
+      <a href="#leaderboards" class="nlink" data-target="leaderboards">מובילים</a>
+      <a href="#gallery" class="nlink" data-target="gallery">גלריה</a>
+      <a href="#community" class="nlink" data-target="community">קהילה</a>
+    </nav>
+    <div class="nav-cta">
+      <div class="status-pill"><span class="dot"></span> <span id="navStatus">אונליין</span></div>
+      <button class="burger" id="burgerBtn"><span></span></button>
+    </div>
+  </div>
+</header>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#home" class="nlink" data-target="home">בית</a>
+  <a href="#features" class="nlink" data-target="features">פיצ'רים</a>
+  <a href="#ranks" class="nlink" data-target="ranks">דרגות</a>
+  <a href="#shop" class="nlink" data-target="shop">חנות</a>
+  <a href="#player" class="nlink" data-target="player">אזור שחקן</a>
+  <a href="#leaderboards" class="nlink" data-target="leaderboards">מובילים</a>
+  <a href="#gallery" class="nlink" data-target="gallery">גלריה</a>
+  <a href="#community" class="nlink" data-target="community">קהילה</a>
+</div>
+
+<main>
+
+<!-- HOME -->
+<section class="section active" id="home">
+  <div class="hero">
+    <div class="hero-bg"></div>
+    <div class="grid-floor"></div>
+    <div class="cubes" id="cubesField"></div>
+    <div class="hero-content">
+      <div class="hero-logo">
+        <svg viewBox="0 0 100 100"><polygon points="50,5 90,27 90,73 50,95 10,73 10,27" fill="none" stroke="#00FFFF" stroke-width="3"/><polygon points="50,5 90,27 50,49 10,27" fill="#00FFFF" opacity=".3"/><polygon points="50,49 90,27 90,73 50,95" fill="#00FF66" opacity=".22"/><polygon points="10,27 50,49 50,95 10,73" fill="#00FFFF" opacity=".12"/></svg>
+      </div>
+      <h1>ברוכים הבאים ל־<span class="hl">Kakedomen</span></h1>
+      <p class="sub">שרת הישרדות מתקדם עם דרגות, קיטים, קוסמטיקה ואירועים. עולם שבונים בו ביחד, יום אחר יום.</p>
+      <div class="hero-actions">
+        <button class="btn btn-primary" onclick="copyIP()">⚡ התחבר עכשיו</button>
+        <a class="btn btn-discord" href="#community" data-target="community">🎮 דיסקורד</a>
+        <a class="btn btn-ghost" href="#shop" data-target="shop">🛒 חנות</a>
+      </div>
+      <div class="server-bar reveal">
+        <div class="cell"><div class="lbl">כתובת שרת</div><div class="val ip" onclick="copyIP()">play.kakedomen.net</div></div>
+        <div class="cell"><div class="lbl">סטטוס</div><div class="val online">● אונליין</div></div>
+        <div class="cell"><div class="lbl">שחקנים מחוברים</div><div class="val" id="playerCount">0/300</div></div>
+        <div class="cell"><div class="lbl">גרסה</div><div class="val">1.21.x</div></div>
+        <div class="cell"><div class="lbl">זמן פעילות</div><div class="val">99.8%</div></div>
+      </div>
+    </div>
+    <div class="scroll-cue"><i></i>גלילה</div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="container">
+    <div class="eyebrow">מה מחכה לך בעולם</div>
+    <h2 class="section-title">פיצ'רים שעושים את ה<span>הבדל</span></h2>
+    <p class="section-sub">כל מה שצריך כדי לבנות, להילחם, להרוויח ולהתבלט — בנוי בקפידה ומאוזן לחוויית משחק מושלמת.</p>
+    <div class="grid grid-3" id="featuresGrid"></div>
+  </div>
+</section>
+
+<!-- RANKS -->
+<section class="section" id="ranks">
+  <div class="container">
+    <div class="eyebrow">העפלה בעולם</div>
+    <h2 class="section-title">בחרו את <span>הדרגה</span> שלכם</h2>
+    <p class="section-sub">כל דרגה פותחת גישה לקיטים, קוסמטיקה והרשאות חדשות. עברו עכבר על כרטיס כדי לגלות עוד.</p>
+    <div class="grid grid-3" id="ranksGrid" style="grid-template-columns:repeat(3,1fr);"></div>
+  </div>
+</section>
+
+<!-- SHOP -->
+<section class="section" id="shop">
+  <div class="container">
+    <div class="eyebrow">חנות רשמית</div>
+    <h2 class="section-title">תמכו בשרת, <span>קבלו בונוסים</span></h2>
+    <p class="section-sub">כל רכישה תורמת ישירות לפיתוח ולתחזוקת Kakedomen. תשלום מאובטח ומשלוח מיידי לחשבון.</p>
+    <div class="shop-tabs" id="shopTabs"></div>
+    <div class="grid grid-4" id="shopGrid"></div>
+    <div class="secure-line">🔒 קנייה מאובטחת בעיבוד תשלומים מוצפן · אספקה אוטומטית תוך דקות</div>
+  </div>
+</section>
+
+<!-- PLAYER AREA -->
+<section class="section" id="player">
+  <div class="container">
+    <div class="eyebrow">הפרופיל שלי</div>
+    <h2 class="section-title">אזור <span>שחקן</span></h2>
+    <p class="section-sub">התחברו עם שם המשתמש שלכם במיינקראפט כדי לראות את הדרגה, הסקין וההתקדמות שלכם בשרת.</p>
+    <div class="player-grid">
+      <div class="panel login-form">
+        <label>שם משתמש במיינקראפט</label>
+        <input type="text" id="usernameInput" placeholder="לדוגמה: Steve_IL" value="ItayCrafter">
+        <button class="btn btn-primary btn-block" onclick="loadPlayer()">🔍 הצג פרופיל</button>
+      </div>
+      <div class="panel" id="playerPanel">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:20px;">
+          <div>
+            <div style="font-size:13px;color:var(--muted);margin-bottom:6px;">שחקן</div>
+            <div style="font-family:var(--ff-display);font-size:22px;font-weight:800;" id="pName">ItayCrafter</div>
+          </div>
+          <div class="rank-chip" id="pRankChip" style="color:#a78bfa;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.3);">👑 VIP+</div>
+        </div>
+        <div class="skin-box">🧍</div>
+        <div class="player-stats">
+          <div class="stat-box"><div class="num" id="pPlaytime">214</div><div class="lab">שעות משחק</div></div>
+          <div class="stat-box"><div class="num" id="pKills">1,032</div><div class="lab">הריגות</div></div>
+          <div class="stat-box"><div class="num" id="pDeaths">387</div><div class="lab">מוות</div></div>
+          <div class="stat-box"><div class="num" id="pBalance">$48,200</div><div class="lab">יתרה</div></div>
+        </div>
+        <div class="achv">
+          <span>🏆 כובש העולם</span><span>⛏ מאסטר מחצבה</span><span>🐉 הורג האנדר דרגון</span><span>🏠 בעל אחוזה</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LEADERBOARDS -->
+<section class="section" id="leaderboards">
+  <div class="container">
+    <div class="eyebrow">לוח התהילה</div>
+    <h2 class="section-title">השחקנים ה<span>מובילים</span></h2>
+    <p class="section-sub">המתחרים הטובים ביותר בשרת — מתעדכן בזמן אמת.</p>
+    <div class="lb-tabs" id="lbTabs"></div>
+    <div class="panel" style="padding:8px 0;overflow-x:auto;">
+      <table class="lb" id="lbTable"></table>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section class="section" id="gallery">
+  <div class="container">
+    <div class="eyebrow">תיעוד מהעולם</div>
+    <h2 class="section-title">גלריית <span>צילומי מסך</span></h2>
+    <p class="section-sub">רגעים נבחרים מהעולם של Kakedomen — בנייה, קרבות ואירועים. לחצו על תמונה להגדלה.</p>
+    <div class="gallery-slider">
+      <div class="slides" id="slidesWrap"></div>
+      <button class="slider-btn prev" onclick="moveSlide(1)">›</button>
+      <button class="slider-btn next" onclick="moveSlide(-1)">‹</button>
+    </div>
+    <div class="dots" id="dotsWrap"></div>
+  </div>
+</section>
+
+<!-- COMMUNITY -->
+<section class="section" id="community">
+  <div class="container">
+    <div class="eyebrow">חדשות ועדכונים</div>
+    <h2 class="section-title">הקהילה של <span>Kakedomen</span></h2>
+    <p class="section-sub">מה קורה בעולם השרת — עדכונים, אירועים והודעות מצוות הניהול.</p>
+    <div class="grid grid-3" id="newsGrid"></div>
+    <div class="discord-cta">
+      <h3>הצטרפו לדיסקורד שלנו 🎮</h3>
+      <p>קבלו עדכונים בזמן אמת, השתתפו באירועים בלעדיים ושוחחו עם הקהילה.</p>
+      <button class="btn btn-discord">להצטרפות לדיסקורד</button>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="logo" style="margin-bottom:14px;">
+          <span class="cube"><svg viewBox="0 0 100 100"><polygon points="50,5 90,27 90,73 50,95 10,73 10,27" fill="none" stroke="#00FFFF" stroke-width="4"/></svg></span>
+          Kake<b>domen</b>
+        </div>
+        <p style="color:var(--muted);font-size:13.5px;line-height:1.7;max-width:280px;">שרת ההישרדות המוביל בישראל. בונים, נלחמים ומתקדמים יחד — מאז 2021.</p>
+        <div class="footer-ip">
+          <span>play.kakedomen.net</span>
+          <button onclick="copyIP()">העתק IP</button>
+        </div>
+      </div>
+      <div>
+        <h5>ניווט מהיר</h5>
+        <ul>
+          <li><a href="#features" class="nlink" data-target="features">פיצ'רים</a></li>
+          <li><a href="#ranks" class="nlink" data-target="ranks">דרגות</a></li>
+          <li><a href="#shop" class="nlink" data-target="shop">חנות</a></li>
+          <li><a href="#leaderboards" class="nlink" data-target="leaderboards">מובילים</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>קהילה</h5>
+        <ul>
+          <li><a href="#community" class="nlink" data-target="community">חדשות</a></li>
+          <li><a href="#community" class="nlink" data-target="community">דיסקורד</a></li>
+          <li><a href="#gallery" class="nlink" data-target="gallery">גלריה</a></li>
+          <li><a href="#player" class="nlink" data-target="player">אזור שחקן</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>מידע</h5>
+        <ul>
+          <li><a href="#">תקנון השרת</a></li>
+          <li><a href="#">מדיניות פרטיות</a></li>
+          <li><a href="#">תנאי רכישה</a></li>
+          <li><a href="#">צוות הניהול</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Kakedomen. כל הזכויות שמורות.</span>
+      <span>אתר זה אינו קשור או מאושר על ידי Mojang AB.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ============ DATA ============ */
+const features = [
+  {ic:'⚔',title:'הישרדות',desc:'עולם הישרדות קלאסי עם איזון מושלם, מובים מאותגרים ומכניקות מותאמות.'},
+  {ic:'💰',title:'כלכלה',desc:'מערכת כלכלית מלאה עם שוק, חנויות שחקנים ומסחר חופשי.'},
+  {ic:'🎩',title:'קוסמטיקה',desc:'מאות פריטי קוסמטיקה — כובעים, חיות מחמד, אפקטים וכינויים.'},
+  {ic:'👑',title:'דרגות',desc:'דרגות VIP ייחודיות עם הרשאות, פקודות וגישה מורחבת.'},
+  {ic:'🎁',title:'קיטים',desc:'קיטי התחלה והישרדות הנטענים מחדש מדי כמה שעות.'},
+  {ic:'🏠',title:'מערכת שטחים',desc:'הגנה מלאה על האדמה שלכם עם פקודות Claim פשוטות וברורות.'},
+  {ic:'🎉',title:'אירועים',desc:'תחרויות שבועיות, מיני-משחקים ופרסים יוקרתיים לזוכים.'},
+  {ic:'🔥',title:'UltraCosmetics',desc:'אפקטי חלקיקים, כנפיים, ותגי צ׳אט מותאמים אישית.'},
+  {ic:'🧩',title:'מערכות מיוחדות',desc:'תוספים בלעדיים שנכתבו במיוחד עבור Kakedomen.'},
+];
+
+const ranks = [
+  {name:'Member',color:'#7dd3fc',price:'חינמי',perks:['גישה בסיסית לשרת','קיט התחלה','פקודות /spawn /tpa','צ׳אט ציבורי']},
+  {name:'VIP',color:'#00FFFF',price:'₪19.90 / חד פעמי',perks:['כל ההרשאות של Member','קיט VIP יומי','/fly באזורי בילוי','3 שטחי Claim נוספים','תג VIP בצ׳אט']},
+  {name:'VIP+',color:'#a78bfa',price:'₪39.90 / חד פעמי',perks:['כל ההרשאות של VIP','קוסמטיקה בלעדית','/feed /heal','6 שטחי Claim נוספים','גישה לאזור VIP+']},
+  {name:'MOD',color:'#00FF66',price:'דרגת צוות',perks:['כלי פיקוח וניהול','/freeze /vanish','טיפול בדוחות שחקנים','גישה ללוח בקרה']},
+  {name:'ADMIN',color:'#fbbf24',price:'דרגת צוות',perks:['ניהול שרת מלא','עריכת הרשאות','גישה לקונסולה','ניהול אירועים']},
+  {name:'OWNER',color:'#ff3860',price:'בעלי השרת',perks:['שליטה מלאה במערכת','גישה לכל הפלאגינים','החלטות עליונות','קוד SSH לשרת']},
+];
+
+const shopCategories = ['הכל','דרגות','קיטים','קוסמטיקה','חבילות'];
+const shopItems = [
+  {cat:'דרגות',ic:'👑',name:'דרגת VIP',price:'₪19.90',pop:true},
+  {cat:'דרגות',ic:'💎',name:'דרגת VIP+',price:'₪39.90',pop:false},
+  {cat:'קיטים',ic:'🎁',name:'קיט קרב',price:'₪9.90',pop:false},
+  {cat:'קיטים',ic:'⛏',name:'קיט מחצבה',price:'₪7.90',pop:true},
+  {cat:'קוסמטיקה',ic:'🦋',name:'כנפי אש',price:'₪14.90',pop:false},
+  {cat:'קוסמטיקה',ic:'🐲',name:'חיית מחמד דרקון',price:'₪12.90',pop:true},
+  {cat:'חבילות',ic:'📦',name:'חבילת מתחילים',price:'₪24.90',pop:false},
+  {cat:'חבילות',ic:'🏆',name:'חבילת אלוף',price:'₪59.90',pop:true},
+];
+
+const lbTabs = ['הכי עשירים','הכי הרבה זמן משחק','הכי הרבה הריגות'];
+const lbData = {
+ 'הכי עשירים':[['ItayCrafter','$482,300'],['NetaBuilder','$401,120'],['RoyTheKing','$378,900'],['ShaharPvP','$295,400'],['MikiMiner','$240,150'],['DanaWolf','$198,700'],['OmerX','$176,300'],['LiorSurvive','$152,900']],
+ 'הכי הרבה זמן משחק':[['NetaBuilder','842 שעות'],['ItayCrafter','790 שעות'],['MikiMiner','711 שעות'],['DanaWolf','664 שעות'],['RoyTheKing','602 שעות'],['ShaharPvP','588 שעות'],['OmerX','511 שעות'],['LiorSurvive','470 שעות']],
+ 'הכי הרבה הריגות':[['ShaharPvP','3,210'],['RoyTheKing','2,940'],['ItayCrafter','2,602'],['OmerX','2,310'],['DanaWolf','1,980'],['NetaBuilder','1,755'],['MikiMiner','1,402'],['LiorSurvive','1,098']],
+};
+
+const newsList = [
+  {tag:'עדכון גרסה',title:'עדכון 1.21 פעיל בשרת!',desc:'גרסת השרת עודכנה עם תכנים חדשים, בלוקים ומובים מעולם ה-Overworld המעודכן.',date:'לפני 2 ימים'},
+  {tag:'אירוע',title:'טורניום PvP סופ"ש זה',desc:'הצטרפו לטורניר ה-PvP החודשי עם פרס ראשון של דרגת VIP+ וחבילת מטבעות.',date:'לפני 4 ימים'},
+  {tag:'הודעה',title:'תחזוקה מתוכננת ביום שלישי',desc:'השרת ירד לתחזוקה קצרה לשיפור ביצועים. זמן משוער: 30 דקות.',date:'לפני שבוע'},
+];
+
+const galleryItems = [
+  {emoji:'🏰',cap:'הטירה המרכזית באזור Spawn'},
+  {emoji:'🌋',cap:'אזור הנתר המורחב — אירוע קיץ'},
+  {emoji:'🏙',cap:'עיר השחקנים שנבנתה בקהילה'},
+  {emoji:'⚔️',cap:'ארנה ה-PvP הרשמית'},
+  {emoji:'🌳',cap:'כפר ההתחלה לשחקנים חדשים'},
+];
+
+/* ============ RENDER ============ */
+const featuresGrid = document.getElementById('featuresGrid');
+features.forEach((f,i)=>{
+  const el = document.createElement('div');
+  el.className='feature-card reveal';
+  el.style.transitionDelay=(i*0.05)+'s';
+  el.innerHTML=`<span class="ic">${f.ic}</span><h3>${f.title}</h3><p>${f.desc}</p>`;
+  featuresGrid.appendChild(el);
+});
+
+const ranksGrid = document.getElementById('ranksGrid');
+ranks.forEach((r,i)=>{
+  const el = document.createElement('div');
+  el.className='rank-card reveal';
+  el.style.setProperty('--rc', r.color);
+  el.style.transitionDelay=(i*0.06)+'s';
+  el.innerHTML=`
+    <div class="rank-glow"></div>
+    <div class="rank-head">
+      <div class="rank-tag">דרגה</div>
+      <div class="rank-name">${r.name}</div>
+      <div class="rank-price">${r.price}</div>
+    </div>
+    <div class="rank-body">
+      <ul>${r.perks.map(p=>`<li>${p}</li>`).join('')}</ul>
+      <button class="btn btn-ghost btn-block" style="border-color:${r.color}55;" onclick="goShop()">מידע נוסף</button>
+    </div>`;
+  ranksGrid.appendChild(el);
+});
+
+const shopTabsEl = document.getElementById('shopTabs');
+shopCategories.forEach((c,i)=>{
+  const b = document.createElement('button');
+  b.className='shop-tab'+(i===0?' active':'');
+  b.textContent=c;
+  b.onclick=()=>filterShop(c,b);
+  shopTabsEl.appendChild(b);
+});
+function renderShop(cat){
+  const grid = document.getElementById('shopGrid');
+  grid.innerHTML='';
+  shopItems.filter(it=>cat==='הכל'||it.cat===cat).forEach((it,i)=>{
+    const el=document.createElement('div');
+    el.className='product-card reveal show';
+    el.style.transitionDelay=(i*0.04)+'s';
+    el.innerHTML=`
+      <div class="product-img">${it.pop?'<span class="badge-pop">פופולרי 🔥</span>':''}${it.ic}</div>
+      <div class="product-body">
+        <h4>${it.name}</h4>
+        <div style="font-size:12px;color:var(--muted);">${it.cat}</div>
+        <div class="price">${it.price}</div>
+        <button class="btn btn-primary btn-block btn-sm" onclick="toast('${it.name} נוסף לסל הקניות')">קנייה</button>
+      </div>`;
+    grid.appendChild(el);
+  });
+}
+function filterShop(cat,btn){
+  document.querySelectorAll('.shop-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderShop(cat);
+}
+renderShop('הכל');
+
+const lbTabsEl = document.getElementById('lbTabs');
+lbTabs.forEach((t,i)=>{
+  const b=document.createElement('button');
+  b.className='shop-tab'+(i===0?' active':'');
+  b.textContent=t;
+  b.onclick=()=>{document.querySelectorAll('#lbTabs .shop-tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderLB(t);};
+  lbTabsEl.appendChild(b);
+});
+function renderLB(tab){
+  const table=document.getElementById('lbTable');
+  const colLabel = tab==='הכי עשירים'?'יתרה':(tab==='הכי הרבה זמן משחק'?'זמן משחק':'הריגות');
+  let rows = lbData[tab].map((r,i)=>`
+    <tr class="reveal show" style="transition-delay:${i*0.03}s">
+      <td class="rank-no">#${i+1}</td>
+      <td class="player-name"><span class="av"></span>${r[0]}</td>
+      <td class="lb-val">${r[1]}</td>
+    </tr>`).join('');
+  table.innerHTML = `<thead><tr><th>#</th><th>שחקן</th><th>${colLabel}</th></tr></thead><tbody>${rows}</tbody>`;
+}
+renderLB('הכי עשירים');
+
+const newsGrid = document.getElementById('newsGrid');
+newsList.forEach((n,i)=>{
+  const el=document.createElement('div');
+  el.className='news-card reveal';
+  el.style.transitionDelay=(i*0.06)+'s';
+  el.innerHTML=`<span class="news-tag">${n.tag}</span><h4>${n.title}</h4><p>${n.desc}</p><span class="news-date">${n.date}</span>`;
+  newsGrid.appendChild(el);
+});
+
+const slidesWrap = document.getElementById('slidesWrap');
+const dotsWrap = document.getElementById('dotsWrap');
+galleryItems.forEach((g,i)=>{
+  const s=document.createElement('div');
+  s.className='slide';
+  s.style.background='linear-gradient(135deg, rgba(0,255,255,.08), rgba(0,255,102,.05))';
+  s.innerHTML=`${g.emoji}<div class="cap">${g.cap}</div>`;
+  s.onclick=()=>openLightbox(g.emoji);
+  slidesWrap.appendChild(s);
+  const d=document.createElement('span');
+  d.className=i===0?'active':'';
+  d.onclick=()=>goToSlide(i);
+  dotsWrap.appendChild(d);
+});
+
+/* cubes field */
+const cubesField = document.getElementById('cubesField');
+for(let i=0;i<14;i++){
+  const c=document.createElement('div');
+  c.className='cube-f';
+  c.style.top=Math.random()*70+'%';
+  c.style.left=Math.random()*100+'%';
+  c.style.animationDelay=(Math.random()*5)+'s';
+  c.style.animationDuration=(5+Math.random()*4)+'s';
+  c.style.opacity=(0.3+Math.random()*0.5);
+  c.style.transform=`scale(${0.5+Math.random()*0.8})`;
+  cubesField.appendChild(c);
+}
+
+/* ============ NAV / ROUTING ============ */
+function navigate(target){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(target).classList.add('active');
+  document.querySelectorAll('.nlink').forEach(a=>a.classList.toggle('active', a.dataset.target===target));
+  window.scrollTo({top:0,behavior:'smooth'});
+  document.getElementById('mobileMenu').classList.remove('open');
+  revealCheck();
+}
+document.querySelectorAll('.nlink').forEach(a=>{
+  a.addEventListener('click',e=>{e.preventDefault(); navigate(a.dataset.target);});
+});
+function goShop(){navigate('shop');}
+
+document.getElementById('burgerBtn').addEventListener('click',()=>{
+  document.getElementById('mobileMenu').classList.toggle('open');
+});
+
+window.addEventListener('scroll',()=>{
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY>10);
+});
+
+/* ============ REVEAL ON SCROLL ============ */
+function revealCheck(){
+  document.querySelectorAll('.reveal').forEach(el=>{
+    const r = el.getBoundingClientRect();
+    if(r.top < window.innerHeight*0.9){ el.classList.add('show'); }
+  });
+}
+window.addEventListener('scroll', revealCheck);
+window.addEventListener('resize', revealCheck);
+
+/* ============ GALLERY SLIDER ============ */
+let slideIndex=0;
+function updateSlider(){
+  slidesWrap.style.transform = `translateX(${slideIndex*100}%)`;
+  document.querySelectorAll('#dotsWrap span').forEach((d,i)=>d.classList.toggle('active', i===slideIndex));
+}
+function moveSlide(dir){
+  slideIndex = (slideIndex - dir + galleryItems.length) % galleryItems.length;
+  updateSlider();
+}
+function goToSlide(i){ slideIndex=i; updateSlider(); }
+setInterval(()=>moveSlide(-1), 5000);
+
+function openLightbox(emoji){
+  document.getElementById('lightboxImg').textContent = emoji;
+  document.getElementById('lightbox').classList.add('show');
+}
+function closeLightbox(){ document.getElementById('lightbox').classList.remove('show'); }
+
+/* ============ PLAYER AREA ============ */
+function loadPlayer(){
+  const name = document.getElementById('usernameInput').value.trim() || 'Steve';
+  document.getElementById('pName').textContent = name;
+  document.getElementById('pPlaytime').textContent = (Math.floor(Math.random()*500)+20);
+  document.getElementById('pKills').textContent = (Math.floor(Math.random()*3000)+50).toLocaleString();
+  document.getElementById('pDeaths').textContent = (Math.floor(Math.random()*900)+10).toLocaleString();
+  document.getElementById('pBalance').textContent = '$'+(Math.floor(Math.random()*90000)+1000).toLocaleString();
+  toast('הפרופיל של '+name+' נטען בהצלחה');
+}
+
+/* ============ MISC ============ */
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer=setTimeout(()=>t.classList.remove('show'),2400);
+}
+function copyIP(){
+  const ip='play.kakedomen.net';
+  if(navigator.clipboard){ navigator.clipboard.writeText(ip).catch(()=>{}); }
+  toast('כתובת השרת הועתקה: '+ip);
+}
+
+/* live player counter */
+let target = 187;
+let current = 0;
+function animateCount(){
+  current += Math.ceil((target-current)/12);
+  if(current>target) current=target;
+  document.getElementById('playerCount').textContent = current+'/300';
+  if(current<target) requestAnimationFrame(animateCount);
+}
+setTimeout(animateCount, 900);
+setInterval(()=>{ target = 150+Math.floor(Math.random()*80); animateCount(); }, 12000);
+
+/* ============ LOADER ============ */
+window.addEventListener('load', ()=>{
+  setTimeout(()=>{
+    document.getElementById('loader').classList.add('hide');
+    revealCheck();
+  }, 1500);
+});
+</script>
+</body>
+</html>
