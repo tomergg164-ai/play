@@ -151,8 +151,42 @@ header.nav.scrolled{
   background:var(--panel);border:1px solid var(--border-soft);border-radius:20px;padding:7px 12px;
 }
 .dot{width:8px;height:8px;border-radius:50%;background:var(--secondary);box-shadow:0 0 8px var(--secondary);animation:pulse 1.6s infinite;}
+.dot.off{background:var(--muted-2);box-shadow:none;animation:none;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
 .burger{display:none;width:38px;height:38px;border-radius:9px;background:var(--panel);border:1px solid var(--border-soft);align-items:center;justify-content:center;}
+.cart-btn{position:relative;width:38px;height:38px;border-radius:9px;background:var(--panel);border:1px solid var(--border-soft);display:flex;align-items:center;justify-content:center;font-size:16px;transition:.2s;}
+.cart-btn:hover{border-color:var(--primary);box-shadow:0 0 16px rgba(0,255,255,.25);}
+.cart-badge{position:absolute;top:-6px;left:-6px;background:var(--secondary);color:#021110;font-size:10px;font-weight:800;min-width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 8px rgba(0,255,102,.6);padding:0 3px;}
+.cart-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(2px);z-index:900;opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s ease;}
+.cart-overlay.show{opacity:1;visibility:visible;}
+.cart-drawer{
+  position:fixed;top:0;left:0;height:100vh;width:380px;max-width:88vw;background:rgba(10,12,12,.92);
+  backdrop-filter:blur(18px) saturate(160%);border-right:1px solid var(--border-soft);z-index:901;
+  display:flex;flex-direction:column;transform:translateX(-100%);transition:transform .4s cubic-bezier(.16,1,.3,1);
+}
+.cart-drawer.open{transform:translateX(0);}
+.cart-head{display:flex;align-items:center;justify-content:space-between;padding:22px 22px 18px;border-bottom:1px solid var(--border-soft);}
+.cart-head h3{font-size:17px;}
+.cart-close{width:32px;height:32px;border-radius:8px;background:var(--panel);border:1px solid var(--border-soft);font-size:14px;}
+.cart-close:hover{border-color:var(--primary);}
+.cart-items{flex:1;overflow-y:auto;padding:18px 22px;display:flex;flex-direction:column;gap:14px;}
+.cart-empty{color:var(--muted);font-size:13.5px;text-align:center;margin-top:60px;line-height:1.8;}
+.cart-item{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--border-soft);border-radius:12px;padding:12px;}
+.cart-item .ci-ic{width:42px;height:42px;border-radius:9px;background:linear-gradient(135deg, rgba(0,255,255,.1), rgba(0,255,102,.08));display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.cart-item .ci-info{flex:1;min-width:0;}
+.cart-item .ci-info h5{font-size:13.5px;margin-bottom:4px;}
+.cart-item .ci-price{font-family:var(--ff-display);color:var(--primary);font-size:13px;font-weight:700;}
+.ci-qty{display:flex;align-items:center;gap:8px;}
+.ci-qty button{width:22px;height:22px;border-radius:6px;background:rgba(255,255,255,.06);border:1px solid var(--border-soft);font-size:13px;display:flex;align-items:center;justify-content:center;}
+.ci-qty button:hover{border-color:var(--primary);}
+.ci-qty span{font-size:13px;font-weight:700;min-width:14px;text-align:center;}
+.ci-remove{color:var(--muted-2);font-size:16px;flex-shrink:0;}
+.ci-remove:hover{color:var(--danger);}
+.cart-foot{padding:18px 22px 24px;border-top:1px solid var(--border-soft);}
+.cart-total{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;font-size:14px;color:var(--muted);}
+.cart-total b{font-family:var(--ff-display);font-size:20px;color:var(--text);}
+.cart-secure{text-align:center;font-size:11px;color:var(--muted-2);margin-top:12px;}
+@media(max-width:480px){.cart-drawer{width:100vw;max-width:100vw;}}
 .burger span{display:block;width:16px;height:2px;background:var(--text);position:relative;}
 .burger span::before,.burger span::after{content:'';position:absolute;width:16px;height:2px;background:var(--text);right:0;}
 .burger span::before{top:-5px;}
@@ -205,6 +239,8 @@ header.nav.scrolled{
 .server-bar .cell .val{font-family:var(--ff-display);font-weight:800;font-size:18px;color:var(--text);}
 .server-bar .cell .val.ip{font-size:14px;color:var(--primary);cursor:pointer;}
 .server-bar .cell .val.online{color:var(--secondary);text-shadow:0 0 10px var(--secondary);}
+.server-bar .cell .val.offline{color:var(--danger);text-shadow:0 0 10px var(--danger);}
+.status-note{text-align:center;font-size:12px;color:var(--muted-2);margin-top:14px;}
 
 /* scroll cue */
 .scroll-cue{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:2;color:var(--muted-2);font-size:11px;display:flex;flex-direction:column;align-items:center;gap:6px;}
@@ -402,7 +438,8 @@ footer{border-top:1px solid var(--border-soft);padding:60px 0 28px;margin-top:80
       <a href="#community" class="nlink" data-target="community">קהילה</a>
     </nav>
     <div class="nav-cta">
-      <div class="status-pill"><span class="dot"></span> <span id="navStatus">אונליין</span></div>
+      <div class="status-pill"><span class="dot" id="navDot"></span> <span id="navStatus">בודק...</span></div>
+      <button class="cart-btn" id="cartBtn" onclick="openCart()">🛒<span class="cart-badge" id="cartBadge">0</span></button>
       <button class="burger" id="burgerBtn"><span></span></button>
     </div>
   </div>
@@ -417,7 +454,24 @@ footer{border-top:1px solid var(--border-soft);padding:60px 0 28px;margin-top:80
   <a href="#leaderboards" class="nlink" data-target="leaderboards">מובילים</a>
   <a href="#gallery" class="nlink" data-target="gallery">גלריה</a>
   <a href="#community" class="nlink" data-target="community">קהילה</a>
+  <button class="btn btn-primary btn-block" style="margin-top:10px;" onclick="openCart()">🛒 עגלת קניות (<span id="cartBadgeMobile">0</span>)</button>
 </div>
+
+<div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+<aside class="cart-drawer" id="cartDrawer">
+  <div class="cart-head">
+    <h3>🛒 עגלת הקניות</h3>
+    <button class="cart-close" onclick="closeCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItemsWrap">
+    <div class="cart-empty" id="cartEmpty">העגלה שלך ריקה כרגע.<br>גשו לחנות ובחרו דרגות, קיטים או קוסמטיקה.</div>
+  </div>
+  <div class="cart-foot" id="cartFoot" style="display:none;">
+    <div class="cart-total"><span>סה"כ לתשלום</span><b id="cartTotal">₪0.00</b></div>
+    <button class="btn btn-primary btn-block" onclick="checkoutCart()">מעבר לתשלום</button>
+    <div class="cart-secure">🔒 התשלום יתבצע מול מערכת סליקה מאובטחת (Tebex / Stripe)</div>
+  </div>
+</aside>
 
 <main>
 
@@ -440,11 +494,12 @@ footer{border-top:1px solid var(--border-soft);padding:60px 0 28px;margin-top:80
       </div>
       <div class="server-bar reveal">
         <div class="cell"><div class="lbl">כתובת שרת</div><div class="val ip" onclick="copyIP()">pikacho-1H47.aternos.me</div></div>
-        <div class="cell"><div class="lbl">סטטוס</div><div class="val online">● אונליין</div></div>
-        <div class="cell"><div class="lbl">שחקנים מחוברים</div><div class="val" id="playerCount">0/300</div></div>
-        <div class="cell"><div class="lbl">גרסה</div><div class="val">26.2</div></div>
+        <div class="cell"><div class="lbl">סטטוס</div><div class="val online" id="statusVal">● בודק...</div></div>
+        <div class="cell"><div class="lbl">שחקנים מחוברים</div><div class="val" id="playerCount">—</div></div>
+        <div class="cell"><div class="lbl">גרסה</div><div class="val" id="versionVal">26.2</div></div>
         <div class="cell"><div class="lbl">זמן פעילות</div><div class="val">99.8%</div></div>
       </div>
+      <div class="status-note" id="statusNote">מתחבר לשרת בזמן אמת…</div>
     </div>
     <div class="scroll-cue"><i></i>גלילה</div>
   </div>
@@ -536,6 +591,7 @@ footer{border-top:1px solid var(--border-soft);padding:60px 0 28px;margin-top:80
     <div class="eyebrow">תיעוד מהעולם</div>
     <h2 class="section-title">גלריית <span>צילומי מסך</span></h2>
     <p class="section-sub">רגעים נבחרים מהעולם של Kakedomen — בנייה, קרבות ואירועים. לחצו על תמונה להגדלה.</p>
+    <div class="shop-tabs" id="galleryTabs"></div>
     <div class="gallery-slider">
       <div class="slides" id="slidesWrap"></div>
       <button class="slider-btn prev" onclick="moveSlide(1)">›</button>
@@ -637,14 +693,14 @@ const ranks = [
 
 const shopCategories = ['הכל','דרגות','קיטים','קוסמטיקה','חבילות'];
 const shopItems = [
-  {cat:'דרגות',ic:'👑',name:'דרגת VIP',price:'₪19.90',pop:true},
-  {cat:'דרגות',ic:'💎',name:'דרגת VIP+',price:'₪39.90',pop:false},
-  {cat:'קיטים',ic:'🎁',name:'קיט קרב',price:'₪9.90',pop:false},
-  {cat:'קיטים',ic:'⛏',name:'קיט מחצבה',price:'₪7.90',pop:true},
-  {cat:'קוסמטיקה',ic:'🦋',name:'כנפי אש',price:'₪14.90',pop:false},
-  {cat:'קוסמטיקה',ic:'🐲',name:'חיית מחמד דרקון',price:'₪12.90',pop:true},
-  {cat:'חבילות',ic:'📦',name:'חבילת מתחילים',price:'₪24.90',pop:false},
-  {cat:'חבילות',ic:'🏆',name:'חבילת אלוף',price:'₪59.90',pop:true},
+  {id:'vip',cat:'דרגות',ic:'👑',name:'דרגת VIP',price:'₪19.90',priceNum:19.90,pop:true},
+  {id:'vipplus',cat:'דרגות',ic:'💎',name:'דרגת VIP+',price:'₪39.90',priceNum:39.90,pop:false},
+  {id:'kit_combat',cat:'קיטים',ic:'🎁',name:'קיט קרב',price:'₪9.90',priceNum:9.90,pop:false},
+  {id:'kit_mining',cat:'קיטים',ic:'⛏',name:'קיט מחצבה',price:'₪7.90',priceNum:7.90,pop:true},
+  {id:'wings_fire',cat:'קוסמטיקה',ic:'🦋',name:'כנפי אש',price:'₪14.90',priceNum:14.90,pop:false},
+  {id:'pet_dragon',cat:'קוסמטיקה',ic:'🐲',name:'חיית מחמד דרקון',price:'₪12.90',priceNum:12.90,pop:true},
+  {id:'pack_starter',cat:'חבילות',ic:'📦',name:'חבילת מתחילים',price:'₪24.90',priceNum:24.90,pop:false},
+  {id:'pack_champion',cat:'חבילות',ic:'🏆',name:'חבילת אלוף',price:'₪59.90',priceNum:59.90,pop:true},
 ];
 
 const lbTabs = ['הכי עשירים','הכי הרבה זמן משחק','הכי הרבה הריגות'];
@@ -661,12 +717,15 @@ const newsList = [
 ];
 
 const galleryItems = [
-  {emoji:'🏰',cap:'הטירה המרכזית באזור Spawn'},
-  {emoji:'🌋',cap:'אזור הנתר המורחב — אירוע קיץ'},
-  {emoji:'🏙',cap:'עיר השחקנים שנבנתה בקהילה'},
-  {emoji:'⚔️',cap:'ארנה ה-PvP הרשמית'},
-  {emoji:'🌳',cap:'כפר ההתחלה לשחקנים חדשים'},
+  {emoji:'🏰',cap:'הטירה המרכזית באזור Spawn',cat:'בנייה'},
+  {emoji:'🌋',cap:'אזור הנתר המורחב — אירוע קיץ',cat:'אירועים'},
+  {emoji:'🏙',cap:'עיר השחקנים שנבנתה בקהילה',cat:'בנייה'},
+  {emoji:'⚔️',cap:'ארנה ה-PvP הרשמית',cat:'קרבות'},
+  {emoji:'🌳',cap:'כפר ההתחלה לשחקנים חדשים',cat:'בנייה'},
+  {emoji:'🎆',cap:'אירוע סוף השנה בשרת',cat:'אירועים'},
+  {emoji:'🛡️',cap:'קרב קלאן גדול באזור הספר',cat:'קרבות'},
 ];
+const galleryCategories = ['הכל','בנייה','קרבות','אירועים'];
 
 /* ============ RENDER ============ */
 const featuresGrid = document.getElementById('featuresGrid');
@@ -719,7 +778,7 @@ function renderShop(cat){
         <h4>${it.name}</h4>
         <div style="font-size:12px;color:var(--muted);">${it.cat}</div>
         <div class="price">${it.price}</div>
-        <button class="btn btn-primary btn-block btn-sm" onclick="toast('${it.name} נוסף לסל הקניות')">קנייה</button>
+        <button class="btn btn-primary btn-block btn-sm" onclick="addToCart('${it.id}')">קנייה</button>
       </div>`;
     grid.appendChild(el);
   });
@@ -763,18 +822,34 @@ newsList.forEach((n,i)=>{
 
 const slidesWrap = document.getElementById('slidesWrap');
 const dotsWrap = document.getElementById('dotsWrap');
-galleryItems.forEach((g,i)=>{
-  const s=document.createElement('div');
-  s.className='slide';
-  s.style.background='linear-gradient(135deg, rgba(0,255,255,.08), rgba(0,255,102,.05))';
-  s.innerHTML=`${g.emoji}<div class="cap">${g.cap}</div>`;
-  s.onclick=()=>openLightbox(g.emoji);
-  slidesWrap.appendChild(s);
-  const d=document.createElement('span');
-  d.className=i===0?'active':'';
-  d.onclick=()=>goToSlide(i);
-  dotsWrap.appendChild(d);
+const galleryTabsEl = document.getElementById('galleryTabs');
+let currentGalleryItems = galleryItems;
+
+function renderGallery(cat){
+  currentGalleryItems = (cat==='הכל') ? galleryItems : galleryItems.filter(g=>g.cat===cat);
+  slidesWrap.innerHTML=''; dotsWrap.innerHTML=''; slideIndex=0;
+  currentGalleryItems.forEach((g,i)=>{
+    const s=document.createElement('div');
+    s.className='slide';
+    s.style.background='linear-gradient(135deg, rgba(0,255,255,.08), rgba(0,255,102,.05))';
+    s.innerHTML=`${g.emoji}<div class="cap">${g.cap}</div>`;
+    s.onclick=()=>openLightbox(g.emoji);
+    slidesWrap.appendChild(s);
+    const d=document.createElement('span');
+    d.className=i===0?'active':'';
+    d.onclick=()=>goToSlide(i);
+    dotsWrap.appendChild(d);
+  });
+  updateSlider();
+}
+galleryCategories.forEach((c,i)=>{
+  const b=document.createElement('button');
+  b.className='shop-tab'+(i===0?' active':'');
+  b.textContent=c;
+  b.onclick=()=>{document.querySelectorAll('#galleryTabs .shop-tab').forEach(t=>t.classList.remove('active'));b.classList.add('active');renderGallery(c);};
+  galleryTabsEl.appendChild(b);
 });
+renderGallery('הכל');
 
 /* cubes field */
 const cubesField = document.getElementById('cubesField');
@@ -829,7 +904,8 @@ function updateSlider(){
   document.querySelectorAll('#dotsWrap span').forEach((d,i)=>d.classList.toggle('active', i===slideIndex));
 }
 function moveSlide(dir){
-  slideIndex = (slideIndex - dir + galleryItems.length) % galleryItems.length;
+  if(!currentGalleryItems.length) return;
+  slideIndex = (slideIndex - dir + currentGalleryItems.length) % currentGalleryItems.length;
   updateSlider();
 }
 function goToSlide(i){ slideIndex=i; updateSlider(); }
@@ -866,17 +942,119 @@ function copyIP(){
   toast('כתובת השרת הועתקה: '+ip);
 }
 
-/* live player counter */
-let target = 187;
-let current = 0;
-function animateCount(){
-  current += Math.ceil((target-current)/12);
-  if(current>target) current=target;
-  document.getElementById('playerCount').textContent = current+'/300';
-  if(current<target) requestAnimationFrame(animateCount);
+/* ============ SHOPPING CART ============ */
+let cart = []; // {id, name, ic, price, priceNum, qty}
+
+function addToCart(id){
+  const item = shopItems.find(p=>p.id===id);
+  if(!item) return;
+  const existing = cart.find(c=>c.id===id);
+  if(existing){ existing.qty++; }
+  else { cart.push({...item, qty:1}); }
+  renderCart();
+  toast('🛒 '+item.name+' נוסף לעגלה');
+  openCart();
 }
-setTimeout(animateCount, 900);
-setInterval(()=>{ target = 150+Math.floor(Math.random()*80); animateCount(); }, 12000);
+function changeQty(id, delta){
+  const item = cart.find(c=>c.id===id);
+  if(!item) return;
+  item.qty += delta;
+  if(item.qty<=0){ cart = cart.filter(c=>c.id!==id); }
+  renderCart();
+}
+function removeFromCart(id){
+  cart = cart.filter(c=>c.id!==id);
+  renderCart();
+}
+function cartCount(){ return cart.reduce((s,c)=>s+c.qty,0); }
+function cartTotal(){ return cart.reduce((s,c)=>s+c.qty*c.priceNum,0); }
+
+function renderCart(){
+  const wrap = document.getElementById('cartItemsWrap');
+  const foot = document.getElementById('cartFoot');
+  const empty = document.getElementById('cartEmpty');
+  const count = cartCount();
+  document.getElementById('cartBadge').textContent = count;
+  document.getElementById('cartBadgeMobile').textContent = count;
+  document.getElementById('cartBtn').style.display = 'flex';
+
+  if(cart.length===0){
+    wrap.innerHTML = '<div class="cart-empty" id="cartEmpty">העגלה שלך ריקה כרגע.<br>גשו לחנות ובחרו דרגות, קיטים או קוסמטיקה.</div>';
+    foot.style.display='none';
+    return;
+  }
+  foot.style.display='block';
+  wrap.innerHTML = cart.map(c=>`
+    <div class="cart-item">
+      <div class="ci-ic">${c.ic}</div>
+      <div class="ci-info">
+        <h5>${c.name}</h5>
+        <div class="ci-price">₪${(c.priceNum*c.qty).toFixed(2)}</div>
+      </div>
+      <div class="ci-qty">
+        <button onclick="changeQty('${c.id}',-1)">−</button>
+        <span>${c.qty}</span>
+        <button onclick="changeQty('${c.id}',1)">+</button>
+      </div>
+      <button class="ci-remove" onclick="removeFromCart('${c.id}')">✕</button>
+    </div>`).join('');
+  document.getElementById('cartTotal').textContent = '₪'+cartTotal().toFixed(2);
+}
+function openCart(){
+  document.getElementById('cartDrawer').classList.add('open');
+  document.getElementById('cartOverlay').classList.add('show');
+}
+function closeCart(){
+  document.getElementById('cartDrawer').classList.remove('open');
+  document.getElementById('cartOverlay').classList.remove('show');
+}
+function checkoutCart(){
+  if(cart.length===0) return;
+  toast('🔧 זהו מצב תצוגה — יש לחבר מערכת סליקה אמיתית (Tebex / Stripe) להשלמת התשלום');
+}
+renderCart();
+
+/* ============ LIVE SERVER STATUS (real API, real server) ============ */
+const SERVER_ADDRESS = 'pikacho-1H47.aternos.me';
+let lbTarget = 0, lbCurrent = 0, lbMax = 0;
+function animateCount(){
+  const step = Math.ceil(Math.abs(lbTarget-lbCurrent)/10) || 1;
+  lbCurrent += lbTarget>lbCurrent ? step : (lbTarget<lbCurrent ? -step : 0);
+  if(Math.abs(lbTarget-lbCurrent)<=step) lbCurrent=lbTarget;
+  document.getElementById('playerCount').textContent = lbCurrent+'/'+(lbMax||'?');
+  if(lbCurrent!==lbTarget) requestAnimationFrame(animateCount);
+}
+async function fetchServerStatus(){
+  const dot=document.getElementById('navDot'), navStatus=document.getElementById('navStatus');
+  const statusVal=document.getElementById('statusVal'), versionVal=document.getElementById('versionVal');
+  const note=document.getElementById('statusNote');
+  try{
+    const res = await fetch('https://api.mcsrvstat.us/3/'+SERVER_ADDRESS, {cache:'no-store'});
+    const data = await res.json();
+    if(data && data.online){
+      dot.classList.remove('off');
+      navStatus.textContent='אונליין';
+      statusVal.textContent='● אונליין';
+      statusVal.classList.remove('offline'); statusVal.classList.add('online');
+      lbTarget = (data.players && data.players.online) || 0;
+      lbMax = (data.players && data.players.max) || 0;
+      if(data.version) versionVal.textContent = data.version;
+      note.textContent = 'נתונים חיים מהשרת · עודכן '+new Date().toLocaleTimeString('he-IL',{hour:'2-digit',minute:'2-digit'});
+    } else {
+      dot.classList.add('off');
+      navStatus.textContent='אופליין';
+      statusVal.textContent='● אופליין';
+      statusVal.classList.remove('online'); statusVal.classList.add('offline');
+      lbTarget = 0; lbMax = 0;
+      note.textContent = 'השרת כבוי כרגע — שרתי Aternos נכבים ללא שחקנים, יש להפעיל מהפאנל';
+    }
+  }catch(err){
+    note.textContent = 'לא ניתן היה לבדוק את הסטטוס כרגע, ננסה שוב בקרוב';
+  }
+  animateCount();
+}
+fetchServerStatus();
+setInterval(fetchServerStatus, 30000);
 
 /* ============ LOADER ============ */
 window.addEventListener('load', ()=>{
