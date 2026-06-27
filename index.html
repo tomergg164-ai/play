@@ -439,10 +439,10 @@ footer{border-top:1px solid var(--border-soft);padding:60px 0 28px;margin-top:80
         <a class="btn btn-ghost" href="#shop" data-target="shop">🛒 חנות</a>
       </div>
       <div class="server-bar reveal">
-        <div class="cell"><div class="lbl">כתובת שרת</div><div class="val ip" onclick="copyIP()">play.kakedomen.net</div></div>
+        <div class="cell"><div class="lbl">כתובת שרת</div><div class="val ip" onclick="copyIP()">pikacho-1H47.aternos.me</div></div>
         <div class="cell"><div class="lbl">סטטוס</div><div class="val online">● אונליין</div></div>
         <div class="cell"><div class="lbl">שחקנים מחוברים</div><div class="val" id="playerCount">0/300</div></div>
-        <div class="cell"><div class="lbl">גרסה</div><div class="val">1.21.x</div></div>
+        <div class="cell"><div class="lbl">גרסה</div><div class="val">26.2</div></div>
         <div class="cell"><div class="lbl">זמן פעילות</div><div class="val">99.8%</div></div>
       </div>
     </div>
@@ -573,7 +573,7 @@ footer{border-top:1px solid var(--border-soft);padding:60px 0 28px;margin-top:80
         </div>
         <p style="color:var(--muted);font-size:13.5px;line-height:1.7;max-width:280px;">שרת ההישרדות המוביל בישראל. בונים, נלחמים ומתקדמים יחד — מאז 2021.</p>
         <div class="footer-ip">
-          <span>play.kakedomen.net</span>
+          <span>pikacho-1H47.aternos.me</span>
           <button onclick="copyIP()">העתק IP</button>
         </div>
       </div>
@@ -655,7 +655,7 @@ const lbData = {
 };
 
 const newsList = [
-  {tag:'עדכון גרסה',title:'עדכון 1.21 פעיל בשרת!',desc:'גרסת השרת עודכנה עם תכנים חדשים, בלוקים ומובים מעולם ה-Overworld המעודכן.',date:'לפני 2 ימים'},
+  {tag:'עדכון גרסה',title:'עדכון 26.2 פעיל בשרת!',desc:'גרסת השרת עודכנה עם תכנים חדשים, בלוקים ומובים מעולם ה-Overworld המעודכן.',date:'לפני 2 ימים'},
   {tag:'אירוע',title:'טורניום PvP סופ"ש זה',desc:'הצטרפו לטורניר ה-PvP החודשי עם פרס ראשון של דרגת VIP+ וחבילת מטבעות.',date:'לפני 4 ימים'},
   {tag:'הודעה',title:'תחזוקה מתוכננת ביום שלישי',desc:'השרת ירד לתחזוקה קצרה לשיפור ביצועים. זמן משוער: 30 דקות.',date:'לפני שבוע'},
 ];
@@ -861,7 +861,7 @@ function toast(msg){
   window._toastTimer=setTimeout(()=>t.classList.remove('show'),2400);
 }
 function copyIP(){
-  const ip='play.kakedomen.net';
+  const ip='pikacho-1H47.aternos.me';
   if(navigator.clipboard){ navigator.clipboard.writeText(ip).catch(()=>{}); }
   toast('כתובת השרת הועתקה: '+ip);
 }
